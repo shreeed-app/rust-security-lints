@@ -147,11 +147,14 @@ dylint_linting::dylint_library!();
 /// appropriate compiler flags for UI testing. The test will pass if the
 /// expected warnings are emitted and fail if any unexpected warnings are
 /// emitted or if the expected warnings are not emitted.
-#[test]
-fn ui() {
+#[cfg(test)]
+mod tests {
     use dylint_testing::ui::Test;
 
-    Test::src_base(env!("CARGO_PKG_NAME"), "ui")
-        .rustc_flags(["-Z ui-testing"])
-        .run();
+    #[test]
+    fn ui() {
+        Test::src_base(env!("CARGO_PKG_NAME"), "ui")
+            .rustc_flags(["-Z", "ui-testing"])
+            .run();
+    }
 }

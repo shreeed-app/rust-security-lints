@@ -53,7 +53,7 @@ let add = |a: i32, b: i32| a + b; // OK
 Provides:
 
 - `security_unsafe_usage`  
-  Warns when any usage of Rust's `unsafe` features is detected, including:
+  Denies when any usage of Rust's `unsafe` features is detected, including:
   - `unsafe fn`,
   - `unsafe trait`,
   - `unsafe impl`,
@@ -62,17 +62,44 @@ Provides:
 Example:
 
 ```rust
-unsafe fn dangerous() {} // warning: unsafe function detected
+unsafe fn dangerous() {} // deny: unsafe function detected
 
-unsafe trait UnsafeTrait {} // warning: unsafe trait detected
+unsafe trait UnsafeTrait {} // deny: unsafe trait detected
 
 struct MyType;
-unsafe impl UnsafeTrait for MyType {} // warning: unsafe implementation detected
+unsafe impl UnsafeTrait for MyType {} // deny: unsafe implementation detected
 
 fn main() {
-    // warning: usage of unsafe block detected
+    // deny: usage of unsafe block detected
     unsafe {
         dangerous();
     }
 }
+```
+
+### `panic_usage`
+
+Provides:
+
+- `security_panic_usage`  
+  Denies when any usage of Rust's `panic!`-prone features is detected, including:
+  - `panic!` macros,
+  - `unwrap()` and `expect()` methods,
+  - `todo!()` and `unimplemented!()` macros,
+  - `assert!` and related macros.
+  
+Example:
+
+```rust
+let x: Option<i32> = None;
+x.unwrap(); // deny: Call to panic backend `Unwrap` detected.
+x.expect(""); // deny: Call to panic backend `Expect` detected.
+
+panic!(""); // deny: Call to panic backend `BeginPanic` detected.
+assert!(false); // deny: Call to panic backend `PanickingModule` detected.
+assert_eq!(0, 1); // deny: Call to panic backend `PanickingModule` detected.
+assert_ne!(0, 0); // deny: Call to panic backend `PanickingModule` detected.
+todo!(); // deny: Call to panic backend `PanickingModule` detected.
+unimplemented!(); // deny: Call to panic backend `PanickingModule` detected.
+unreachable!(); // deny: Call to panic backend `PanickingModule` detected.
 ```

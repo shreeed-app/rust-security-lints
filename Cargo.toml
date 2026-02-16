@@ -1,6 +1,10 @@
 [workspace]
-members = ["missing_type", "unsafe_usage"]
+members = ["missing_type", "unsafe_usage", "panic_usage"]
 resolver = "2"
 
 [workspace.metadata.dylint]
-libraries = [{ path = "missing_type" }, { path = "unsafe_usage" }]
+libraries = [
+    { path = "missing_type" },
+    { path = "unsafe_usage" },
+    { path = "panic_usage" },
+]

@@ -23,7 +23,7 @@ use rustc_session::{Session, declare_lint, declare_lint_pass};
 
 declare_lint! {
     pub SECURITY_UNSAFE_USAGE,
-    Warn,
+    Deny,
     "Detects usage of unsafe blocks, unsafe functions, unsafe
     traits and unsafe implementations."
 }
@@ -105,17 +105,17 @@ impl<'tcx> LateLintPass<'tcx> for SecurityUnsafeUsage {
 
             // Unsafe implementation.
             ItemKind::Impl(impl_) => {
-                if let Some(trait_impl) = impl_.of_trait {
-                    if trait_impl.safety == Safety::Unsafe {
-                        context.span_lint(
-                            SECURITY_UNSAFE_USAGE,
-                            item.span,
-                            |diagnostic: &mut Diag<'_, ()>| {
-                                diagnostic
-                                    .primary_message("Unsafe impl detected.");
-                            },
-                        );
-                    }
+                if let Some(trait_impl) = impl_.of_trait
+                    && trait_impl.safety == Safety::Unsafe
+                {
+                    context.span_lint(
+                        SECURITY_UNSAFE_USAGE,
+                        item.span,
+                        |diagnostic: &mut Diag<'_, ()>| {
+                            diagnostic
+                                .primary_message("Unsafe impl detected.");
+                        },
+                    );
                 }
             },
 
@@ -152,11 +152,14 @@ dylint_linting::dylint_library!();
 /// emitted for safe code. The tests will pass if the expected warnings are
 /// emitted and fail if any unexpected warnings are emitted or if the expected
 /// warnings are not emitted.
-#[test]
-fn ui() {
+#[cfg(test)]
+mod tests {
     use dylint_testing::ui::Test;
 
-    Test::src_base(env!("CARGO_PKG_NAME"), "ui")
-        .rustc_flags(["-Z ui-testing"])
-        .run();
+    #[test]
+    fn ui() {
+        Test::src_base(env!("CARGO_PKG_NAME"), "ui")
+            .rustc_flags(["-Z", "ui-testing"])
+            .run();
+    }
 }

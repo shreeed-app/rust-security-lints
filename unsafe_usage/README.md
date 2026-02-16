@@ -4,7 +4,7 @@
 
 `unsafe_usage` is a Dylint security lint that detects any usage of Rust's `unsafe` features.
 
-It emits a warning when it encounters:
+It emits a denial when it encounters:
 
 - `unsafe fn`,
 - `unsafe trait`,
