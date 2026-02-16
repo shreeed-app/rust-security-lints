@@ -16,7 +16,7 @@ warning: Call to panic backend `Expect` detected.
 LL |     x.expect(""); // should trigger.
    |     ^^^^^^^^^^^^
 
-warning: Call to panic backend `BeginPanic` detected.
+warning: Call to panic backend `PanicFmt` detected.
   --> $DIR/main.rs:13:5
    |
 LL |     panic!(""); // Should trigger.

@@ -162,7 +162,7 @@ mod tests {
     #[test]
     fn ui() {
         Test::src_base(env!("CARGO_PKG_NAME"), "ui")
-            .rustc_flags(["-Z", "ui-testing"])
+            .rustc_flags(["--edition=2024", "-Z", "ui-testing"])
             .run();
     }
 }

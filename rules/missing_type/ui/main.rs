@@ -29,3 +29,19 @@ fn main() {
     // Closure with `_` pattern (should not trigger).
     let ignore: fn(i32) -> i32 = |_| 0;
 }
+
+/// Asynchronous function example to demonstrate that the `missing_type` lint
+/// does not trigger for async functions, as they may have implicit return
+/// types and parameters that are not explicitly annotated. This function takes
+/// an `i32` parameter and returns a future that resolves to an `i32`. The lint
+/// should not emit a warning for this function, as it is common for async
+/// functions to have implicit return types and parameters without explicit
+/// type annotations, especially when using async/await syntax.
+async fn async_example(x: i32) -> i32 {
+    x + 1
+}
+
+async fn async_with_let() -> i32 {
+    let value: i32 = 10;
+    value
+}

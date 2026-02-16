@@ -7,7 +7,7 @@ extern crate rustc_middle;
 extern crate rustc_session;
 
 use rustc_errors::Diag;
-use rustc_hir::{Body, Expr, ExprKind, LetStmt, PatKind};
+use rustc_hir::{Body, ClosureKind, Expr, ExprKind, LetStmt, PatKind};
 use rustc_lint::{LateContext, LateLintPass, LintContext, LintStore};
 use rustc_middle::ty::TyCtxt;
 use rustc_session::{Session, declare_lint, declare_lint_pass};
@@ -55,6 +55,11 @@ impl<'tcx> LateLintPass<'tcx> for MissingType {
         if matches!(local.pat.kind, PatKind::Wild) {
             return;
         }
+        // Skip if the let statement is from a macro expansion, as it may not
+        // be possible to determine the type annotation in that case.
+        if local.span.desugaring_kind().is_some() {
+            return;
+        }
 
         // Check if the let statement has an explicit type annotation. If not,
         // emit a warning.
@@ -84,17 +89,17 @@ impl<'tcx> LateLintPass<'tcx> for MissingType {
         context: &LateContext<'tcx>,
         expression: &'tcx Expr<'tcx>,
     ) {
-        // Skip if the expression is from a macro expansion, as it may not be
-        // possible to determine the type annotation in that case.
-        if expression.span.from_expansion() {
-            return;
-        }
-
         // Only check closure expressions.
         let ExprKind::Closure(closure): &ExprKind<'tcx> = &expression.kind
         else {
             return;
         };
+
+        // Skip if the expression is from a macro expansion, as it may not be
+        // possible to determine the type annotation in that case.
+        if matches!(closure.kind, ClosureKind::Coroutine(_)) {
+            return;
+        }
 
         // Get the body of the closure to access its parameters.
         let body: &Body<'_> = context.tcx.hir_body(closure.body);
@@ -103,13 +108,6 @@ impl<'tcx> LateLintPass<'tcx> for MissingType {
         // check if it has an explicit type annotation. If not, and if
         // the parameter pattern is not `_`, emit a warning.
         for param in body.params {
-            // Skip if the parameter pattern is from a macro expansion, as it
-            // may not be possible to determine the type annotation in that
-            // case.
-            if param.pat.span.from_expansion() {
-                continue;
-            }
-
             // Skip if the parameter pattern is `_`.
             if matches!(param.pat.kind, PatKind::Wild) {
                 continue;
@@ -167,7 +165,7 @@ mod tests {
     #[test]
     fn ui() {
         Test::src_base(env!("CARGO_PKG_NAME"), "ui")
-            .rustc_flags(["-Z", "ui-testing"])
+            .rustc_flags(["--edition=2024", "-Z", "ui-testing"])
             .run();
     }
 }
