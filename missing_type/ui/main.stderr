@@ -1,0 +1,42 @@
+warning: Missing explicit type annotation on let binding.
+  --> $DIR/main.rs:11:9
+   |
+LL |     let x = 5;
+   |         ^
+   |
+   = note: `#[warn(missing_let_type)]` on by default
+
+warning: Closure parameter missing explicit type annotation.
+  --> $DIR/main.rs:20:37
+   |
+LL |     let add: fn(i32, i32) -> i32 = |a, b| a + b;
+   |                                     ^
+   |
+   = note: `#[warn(missing_closure_param_type)]` on by default
+
+warning: Closure parameter missing explicit type annotation.
+  --> $DIR/main.rs:20:40
+   |
+LL |     let add: fn(i32, i32) -> i32 = |a, b| a + b;
+   |                                        ^
+
+warning: Missing explicit type annotation on let binding.
+  --> $DIR/main.rs:23:9
+   |
+LL |     let sub = |a: i32, b: i32| a - b;
+   |         ^^^
+
+warning: Missing explicit type annotation on let binding.
+  --> $DIR/main.rs:26:9
+   |
+LL |     let mul = |a: i32, b| a * b;
+   |         ^^^
+
+warning: Closure parameter missing explicit type annotation.
+  --> $DIR/main.rs:26:24
+   |
+LL |     let mul = |a: i32, b| a * b;
+   |                        ^
+
+warning: 6 warnings emitted
+

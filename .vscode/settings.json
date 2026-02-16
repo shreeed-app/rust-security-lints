@@ -1,0 +1,32 @@
+{
+    "files.eol": "\n",
+    "files.autoSave": "afterDelay",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "always"
+    },
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+        "mod.rs": "*.rs",
+    },
+    "[rust]": {
+        "editor.defaultFormatter": "rust-lang.rust-analyzer",
+        "editor.formatOnSave": true
+    },
+    "rust-analyzer.cargo.buildScripts.enable": true,
+    "rust-analyzer.procMacro.enable": true,
+    "rust-analyzer.rustc.source": "discover",
+    "[toml]": {
+        "editor.defaultFormatter": "tamasfe.even-better-toml"
+    },
+    "[yaml]": {
+        "editor.defaultFormatter": "redhat.vscode-yaml"
+    },
+    "cSpell.words": [
+        "catthehacker",
+        "ctxt",
+        "dylint",
+        "rustsec",
+        "rustup"
+    ]
+}

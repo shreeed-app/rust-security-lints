@@ -1,0 +1,6 @@
+[workspace]
+members = ["missing_type"]
+resolver = "2"
+
+[workspace.metadata.dylint]
+libraries = [{ path = "missing_type" }]
