@@ -110,8 +110,8 @@ impl<'tcx> LateLintPass<'tcx> for MissingType {
                     param.pat.span,
                     |diagnostic: &mut Diag<'_, ()>| {
                         diagnostic.primary_message(
-                        "Closure parameter missing explicit type annotation.",
-                    );
+                            "Closure parameter missing explicit type annotation.",
+                        );
                     },
                 );
             }
