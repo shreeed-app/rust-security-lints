@@ -84,6 +84,12 @@ impl<'tcx> LateLintPass<'tcx> for MissingType {
         context: &LateContext<'tcx>,
         expression: &'tcx Expr<'tcx>,
     ) {
+        // Skip if the expression is from a macro expansion, as it may not be
+        // possible to determine the type annotation in that case.
+        if expression.span.from_expansion() {
+            return;
+        }
+
         // Only check closure expressions.
         let ExprKind::Closure(closure): &ExprKind<'tcx> = &expression.kind
         else {
@@ -97,6 +103,13 @@ impl<'tcx> LateLintPass<'tcx> for MissingType {
         // check if it has an explicit type annotation. If not, and if
         // the parameter pattern is not `_`, emit a warning.
         for param in body.params {
+            // Skip if the parameter pattern is from a macro expansion, as it
+            // may not be possible to determine the type annotation in that
+            // case.
+            if param.pat.span.from_expansion() {
+                continue;
+            }
+
             // Skip if the parameter pattern is `_`.
             if matches!(param.pat.kind, PatKind::Wild) {
                 continue;
