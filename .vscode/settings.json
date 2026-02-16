@@ -26,10 +26,13 @@
         "callsite",
         "catthehacker",
         "ctxt",
+        "desugared",
         "dylint",
+        "krate",
         "qpath",
         "rustsec",
         "rustup",
+        "typeck",
         "usize"
     ]
 }

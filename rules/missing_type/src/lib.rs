@@ -55,6 +55,18 @@ impl<'tcx> LateLintPass<'tcx> for MissingType {
         if matches!(local.pat.kind, PatKind::Wild) {
             return;
         }
+        // Skip if the let statement is from a macro expansion, as it may not
+        // be possible to determine the type annotation in that case.
+        // Ignore anything coming from macro expansion (async_trait, derives,
+        // etc.)
+        if local.span.from_expansion() {
+            return;
+        }
+
+        // Ignore desugared constructs (async lowering, ?, for loops, etc.)
+        if local.span.desugaring_kind().is_some() {
+            return;
+        }
 
         // Check if the let statement has an explicit type annotation. If not,
         // emit a warning.
@@ -84,11 +96,21 @@ impl<'tcx> LateLintPass<'tcx> for MissingType {
         context: &LateContext<'tcx>,
         expression: &'tcx Expr<'tcx>,
     ) {
+        if expression.span.from_expansion() {
+            return;
+        }
+
         // Only check closure expressions.
         let ExprKind::Closure(closure): &ExprKind<'tcx> = &expression.kind
         else {
             return;
         };
+
+        // Skip if the expression is from a macro expansion, as it may not be
+        // possible to determine the type annotation in that case.
+        if matches!(closure.kind, rustc_hir::ClosureKind::Coroutine(_)) {
+            return;
+        }
 
         // Get the body of the closure to access its parameters.
         let body: &Body<'_> = context.tcx.hir_body(closure.body);
@@ -154,7 +176,7 @@ mod tests {
     #[test]
     fn ui() {
         Test::src_base(env!("CARGO_PKG_NAME"), "ui")
-            .rustc_flags(["-Z", "ui-testing"])
+            .rustc_flags(["--edition=2024", "-Z", "ui-testing"])
             .run();
     }
 }

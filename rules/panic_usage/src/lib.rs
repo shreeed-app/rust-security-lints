@@ -12,6 +12,7 @@ use rustc_hir::{Expr, ExprKind};
 use rustc_lint::{LateContext, LateLintPass, LintContext, LintStore};
 use rustc_middle::ty::TyCtxt;
 use rustc_session::{Session, declare_lint, declare_lint_pass};
+use rustc_span::sym;
 
 declare_lint! {
     pub SECURITY_PANIC_USAGE,
@@ -20,26 +21,6 @@ declare_lint! {
 }
 
 declare_lint_pass!(SecurityPanicUsage => [SECURITY_PANIC_USAGE]);
-
-/// Enum representing the different kinds of panic-related constructs that can
-/// be detected by the `SECURITY_PANIC_USAGE` lint, such as calls to `unwrap`
-/// and `expect` methods, as well as calls to panic-related functions in the
-/// standard library.
-#[derive(Debug, Clone, Copy)]
-enum PanicKind {
-    Unwrap,
-    Expect,
-}
-
-impl PanicKind {
-    fn from_method(name: &str) -> Option<Self> {
-        match name {
-            "unwrap" => Some(Self::Unwrap),
-            "expect" => Some(Self::Expect),
-            _ => None,
-        }
-    }
-}
 
 /// Enum representing the different panic backends that can be detected by the
 /// `SECURITY_PANIC_USAGE` lint, such as the `panicking` module, the
@@ -87,20 +68,29 @@ impl<'tcx> LateLintPass<'tcx> for SecurityPanicUsage {
         expression: &'tcx Expr<'tcx>,
     ) {
         // Detect direct calls to `unwrap` and `expect` methods.
-        if let ExprKind::MethodCall(segment, _, _, _) = &expression.kind
-            && let Some(kind) =
-                PanicKind::from_method(segment.ident.name.as_str())
+        // This checks for method calls where the method name is `unwrap` or
+        // `expect`, and the method is defined in the local crate (to avoid
+        // false positives from external crates).
+        if let ExprKind::MethodCall(_, _, _, _) = &expression.kind
+            && let Some(def_id) = context
+                .typeck_results()
+                .type_dependent_def_id(expression.hir_id)
         {
-            context.span_lint(
-                SECURITY_PANIC_USAGE,
-                expression.span,
-                |diagnostic: &mut Diag<'_, ()>| {
-                    diagnostic.primary_message(format!(
-                        "Call to panic backend `{kind:?}` detected."
-                    ));
-                },
-            );
-            return;
+            if context.tcx.is_diagnostic_item(sym::unwrap, def_id)
+                || context.tcx.is_diagnostic_item(sym::option_unwrap, def_id)
+                || context.tcx.is_diagnostic_item(sym::except, def_id)
+                || context.tcx.is_diagnostic_item(sym::option_expect, def_id)
+            {
+                context.span_lint(
+                    SECURITY_PANIC_USAGE,
+                    expression.span,
+                    |diagnostic: &mut Diag<'_, ()>| {
+                        diagnostic.primary_message(
+                            "Call to panic backend `unwrap/expect` detected.",
+                        );
+                    },
+                );
+            }
         }
 
         // Detect calls to panic-related functions in the standard library.
@@ -162,7 +152,7 @@ mod tests {
     #[test]
     fn ui() {
         Test::src_base(env!("CARGO_PKG_NAME"), "ui")
-            .rustc_flags(["-Z", "ui-testing"])
+            .rustc_flags(["--edition=2024", "-Z", "ui-testing"])
             .run();
     }
 }
