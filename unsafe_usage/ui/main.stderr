@@ -1,0 +1,34 @@
+warning: Unsafe function detected.
+  --> $DIR/main.rs:3:1
+   |
+LL | unsafe fn unsafe_function() {} // Should trigger.
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+note: the lint level is defined here
+  --> $DIR/main.rs:1:9
+   |
+LL | #![warn(security_unsafe_usage)]
+   |         ^^^^^^^^^^^^^^^^^^^^^
+
+warning: Unsafe trait detected.
+  --> $DIR/main.rs:6:1
+   |
+LL | unsafe trait UnsafeTrait {} // Should trigger.
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: Unsafe impl detected.
+  --> $DIR/main.rs:11:1
+   |
+LL | unsafe impl UnsafeTrait for MyType {} // Should trigger.
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: Usage of unsafe block detected.
+  --> $DIR/main.rs:22:5
+   |
+LL | /     unsafe {
+LL | |         unsafe_function(); // Should trigger (unsafe block).
+LL | |     }
+   | |_____^
+
+warning: 4 warnings emitted
+

@@ -47,3 +47,32 @@ let y: i32 = 5; // OK
 let add = |a, b| a + b; // warning: missing explicit type annotations on closure parameters
 let add = |a: i32, b: i32| a + b; // OK
 ```
+
+### `unsafe_usage`
+
+Provides:
+
+- `security_unsafe_usage`  
+  Warns when any usage of Rust's `unsafe` features is detected, including:
+  - `unsafe fn`,
+  - `unsafe trait`,
+  - `unsafe impl`,
+  - `unsafe {}` blocks.
+  
+Example:
+
+```rust
+unsafe fn dangerous() {} // warning: unsafe function detected
+
+unsafe trait UnsafeTrait {} // warning: unsafe trait detected
+
+struct MyType;
+unsafe impl UnsafeTrait for MyType {} // warning: unsafe implementation detected
+
+fn main() {
+    // warning: usage of unsafe block detected
+    unsafe {
+        dangerous();
+    }
+}
+```

@@ -134,7 +134,6 @@ pub fn register_lints(session: &Session, lint_store: &mut LintStore) {
     dylint_linting::init_config(session);
 
     lint_store.register_lints(&[MISSING_LET_TYPE, MISSING_CLOSURE_PARAM_TYPE]);
-
     lint_store.register_late_pass(|_: TyCtxt<'_>| Box::new(MissingType));
 }
 

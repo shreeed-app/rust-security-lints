@@ -25,3 +25,4 @@ fn main() {
     // - missing explicit type annotation on let binding
     // - closure parameter missing explicit type annotation
 }
+```
