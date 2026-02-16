@@ -7,7 +7,7 @@ extern crate rustc_middle;
 extern crate rustc_session;
 
 use rustc_errors::Diag;
-use rustc_hir::{Body, ClosureKind, Expr, ExprKind, LetStmt, PatKind};
+use rustc_hir::{Body, Expr, ExprKind, LetStmt, PatKind};
 use rustc_lint::{LateContext, LateLintPass, LintContext, LintStore};
 use rustc_middle::ty::TyCtxt;
 use rustc_session::{Session, declare_lint, declare_lint_pass};
@@ -57,6 +57,13 @@ impl<'tcx> LateLintPass<'tcx> for MissingType {
         }
         // Skip if the let statement is from a macro expansion, as it may not
         // be possible to determine the type annotation in that case.
+        // Ignore anything coming from macro expansion (async_trait, derives,
+        // etc.)
+        if local.span.from_expansion() {
+            return;
+        }
+
+        // Ignore desugared constructs (async lowering, ?, for loops, etc.)
         if local.span.desugaring_kind().is_some() {
             return;
         }
@@ -89,6 +96,10 @@ impl<'tcx> LateLintPass<'tcx> for MissingType {
         context: &LateContext<'tcx>,
         expression: &'tcx Expr<'tcx>,
     ) {
+        if expression.span.from_expansion() {
+            return;
+        }
+
         // Only check closure expressions.
         let ExprKind::Closure(closure): &ExprKind<'tcx> = &expression.kind
         else {
@@ -97,7 +108,7 @@ impl<'tcx> LateLintPass<'tcx> for MissingType {
 
         // Skip if the expression is from a macro expansion, as it may not be
         // possible to determine the type annotation in that case.
-        if matches!(closure.kind, ClosureKind::Coroutine(_)) {
+        if matches!(closure.kind, rustc_hir::ClosureKind::Coroutine(_)) {
             return;
         }
 

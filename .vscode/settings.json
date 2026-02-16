@@ -26,6 +26,7 @@
         "callsite",
         "catthehacker",
         "ctxt",
+        "desugared",
         "dylint",
         "qpath",
         "rustsec",
