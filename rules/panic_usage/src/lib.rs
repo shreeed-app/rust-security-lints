@@ -86,6 +86,11 @@ impl<'tcx> LateLintPass<'tcx> for SecurityPanicUsage {
         context: &LateContext<'tcx>,
         expression: &'tcx Expr<'tcx>,
     ) {
+        // Ignore external macro expansions.
+        if expression.span.source_callsite().from_expansion() {
+            return;
+        }
+
         // Detect direct calls to `unwrap` and `expect` methods.
         if let ExprKind::MethodCall(segment, _, _, _) = &expression.kind
             && let Some(kind) =
