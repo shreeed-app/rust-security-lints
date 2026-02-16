@@ -21,6 +21,10 @@ declare_lint! {
 
 declare_lint_pass!(SecurityPanicUsage => [SECURITY_PANIC_USAGE]);
 
+/// Enum representing the different kinds of panic-related constructs that can
+/// be detected by the `SECURITY_PANIC_USAGE` lint, such as calls to `unwrap`
+/// and `expect` methods, as well as calls to panic-related functions in the
+/// standard library.
 #[derive(Debug, Clone, Copy)]
 enum PanicKind {
     Unwrap,
@@ -37,6 +41,10 @@ impl PanicKind {
     }
 }
 
+/// Enum representing the different panic backends that can be detected by the
+/// `SECURITY_PANIC_USAGE` lint, such as the `panicking` module, the
+/// `panic_fmt` function, the `panic_display` function, the `assert_failed`
+/// function, and the `begin_panic` function in the standard library.
 #[derive(Debug, Clone, Copy)]
 enum PanicBackend {
     PanickingModule,

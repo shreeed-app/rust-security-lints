@@ -1,0 +1,19 @@
+[package]
+name = "indexing_usage"
+version = "1.0.0"
+description = "A Dylint lint that checks for indexing and slicing usage."
+edition = "2024"
+license = "MIT"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+dylint_linting = "5.0.0"
+
+[dev-dependencies]
+dylint_testing = "5.0.0"
+
+[package.metadata.rust-analyzer]
+rustc_private = true

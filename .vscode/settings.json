@@ -29,6 +29,7 @@
         "dylint",
         "qpath",
         "rustsec",
-        "rustup"
+        "rustup",
+        "usize"
     ]
 }
