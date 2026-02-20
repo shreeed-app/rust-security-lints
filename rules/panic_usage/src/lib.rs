@@ -75,22 +75,20 @@ impl<'tcx> LateLintPass<'tcx> for SecurityPanicUsage {
             && let Some(def_id) = context
                 .typeck_results()
                 .type_dependent_def_id(expression.hir_id)
-        {
-            if context.tcx.is_diagnostic_item(sym::unwrap, def_id)
+            && (context.tcx.is_diagnostic_item(sym::unwrap, def_id)
                 || context.tcx.is_diagnostic_item(sym::option_unwrap, def_id)
                 || context.tcx.is_diagnostic_item(sym::except, def_id)
-                || context.tcx.is_diagnostic_item(sym::option_expect, def_id)
-            {
-                context.span_lint(
-                    SECURITY_PANIC_USAGE,
-                    expression.span,
-                    |diagnostic: &mut Diag<'_, ()>| {
-                        diagnostic.primary_message(
-                            "Call to panic backend `unwrap/expect` detected.",
-                        );
-                    },
-                );
-            }
+                || context.tcx.is_diagnostic_item(sym::option_expect, def_id))
+        {
+            context.span_lint(
+                SECURITY_PANIC_USAGE,
+                expression.span,
+                |diagnostic: &mut Diag<'_, ()>| {
+                    diagnostic.primary_message(
+                        "Call to panic backend `unwrap/expect` detected.",
+                    );
+                },
+            );
         }
 
         // Detect calls to panic-related functions in the standard library.

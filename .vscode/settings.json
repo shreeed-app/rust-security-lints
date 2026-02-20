@@ -30,6 +30,7 @@
         "dylint",
         "krate",
         "qpath",
+        "rustflags",
         "rustsec",
         "rustup",
         "typeck",

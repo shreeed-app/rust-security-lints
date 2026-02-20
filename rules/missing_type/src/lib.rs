@@ -5,9 +5,10 @@ extern crate rustc_hir;
 extern crate rustc_lint;
 extern crate rustc_middle;
 extern crate rustc_session;
+extern crate rustc_span;
 
 use rustc_errors::Diag;
-use rustc_hir::{Body, Expr, ExprKind, LetStmt, PatKind};
+use rustc_hir::{Body, BodyId, Expr, ExprKind, LetStmt, PatKind};
 use rustc_lint::{LateContext, LateLintPass, LintContext, LintStore};
 use rustc_middle::ty::TyCtxt;
 use rustc_session::{Session, declare_lint, declare_lint_pass};
@@ -55,6 +56,17 @@ impl<'tcx> LateLintPass<'tcx> for MissingType {
         if matches!(local.pat.kind, PatKind::Wild) {
             return;
         }
+
+        let Some(body_id): Option<BodyId> = context.enclosing_body else {
+            return;
+        };
+
+        // Skip if the let statement is from a macro expansion, as it may not
+        // be possible to determine the type annotation in that case.
+        if context.tcx.hir_body(body_id).value.span.from_expansion() {
+            return;
+        }
+
         // Skip if the let statement is from a macro expansion, as it may not
         // be possible to determine the type annotation in that case.
         // Ignore anything coming from macro expansion (async_trait, derives,
