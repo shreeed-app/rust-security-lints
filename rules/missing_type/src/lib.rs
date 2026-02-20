@@ -59,7 +59,7 @@ impl<'tcx> LateLintPass<'tcx> for MissingType {
         // be possible to determine the type annotation in that case.
         // Ignore anything coming from macro expansion (async_trait, derives,
         // etc.)
-        if local.span.from_expansion() {
+        if !local.span.ctxt().outer_expn_data().is_root() {
             return;
         }
 
