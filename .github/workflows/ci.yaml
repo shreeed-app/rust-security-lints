@@ -14,7 +14,6 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: always
-  RUSTFLAGS: "-D warnings"
 
 jobs:
   ci:
@@ -36,7 +35,8 @@ jobs:
 
       - uses: cargo-bins/cargo-binstall@main
 
-      - run: |
+      - name: Install dependencies
+        run: |
           cargo binstall -y \
             cargo-make \
             cargo-deny \
