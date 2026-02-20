@@ -8,7 +8,7 @@ extern crate rustc_session;
 extern crate rustc_span;
 
 use rustc_errors::Diag;
-use rustc_hir::{Body, Expr, ExprKind, LetStmt, PatKind};
+use rustc_hir::{Body, BodyId, Expr, ExprKind, LetStmt, PatKind};
 use rustc_lint::{LateContext, LateLintPass, LintContext, LintStore};
 use rustc_middle::ty::TyCtxt;
 use rustc_session::{Session, declare_lint, declare_lint_pass};
@@ -57,7 +57,7 @@ impl<'tcx> LateLintPass<'tcx> for MissingType {
             return;
         }
 
-        let Some(body_id) = context.enclosing_body else {
+        let Some(body_id): Option<BodyId> = context.enclosing_body else {
             return;
         };
 

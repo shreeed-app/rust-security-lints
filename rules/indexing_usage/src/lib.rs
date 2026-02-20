@@ -33,51 +33,47 @@ impl<'tcx> LateLintPass<'tcx> for SecurityIndexingUsage {
         context: &LateContext<'tcx>,
         expression: &'tcx Expr<'tcx>,
     ) {
-        match &expression.kind {
-            ExprKind::Index(_, index_expr, _) => {
-                match &index_expr.kind {
-                    // Literal indexing: array[0].
-                    ExprKind::Lit(_) => {
-                        context.span_lint(
-                            SECURITY_INDEXING_USAGE,
-                            expression.span,
-                            |diagnostic: &mut Diag<'_, ()>| {
-                                diagnostic.primary_message(
-                                    "Usage of indexing operation detected.",
-                                );
-                            },
-                        );
-                    },
+        if let ExprKind::Index(_, index_expr, _) = &expression.kind {
+            match &index_expr.kind {
+                // Literal indexing: array[0].
+                ExprKind::Lit(_) => {
+                    context.span_lint(
+                        SECURITY_INDEXING_USAGE,
+                        expression.span,
+                        |diagnostic: &mut Diag<'_, ()>| {
+                            diagnostic.primary_message(
+                                "Usage of indexing operation detected.",
+                            );
+                        },
+                    );
+                },
 
-                    // Range slicing: array[1..], array[..], array[a..b].
-                    ExprKind::Struct(_, _, _) => {
-                        context.span_lint(
-                            SECURITY_INDEXING_USAGE,
-                            expression.span,
-                            |diagnostic: &mut Diag<'_, ()>| {
-                                diagnostic.primary_message(
-                                    "Usage of slicing operation detected.",
-                                );
-                            },
-                        );
-                    },
+                // Range slicing: array[1..], array[..], array[a..b].
+                ExprKind::Struct(_, _, _) => {
+                    context.span_lint(
+                        SECURITY_INDEXING_USAGE,
+                        expression.span,
+                        |diagnostic: &mut Diag<'_, ()>| {
+                            diagnostic.primary_message(
+                                "Usage of slicing operation detected.",
+                            );
+                        },
+                    );
+                },
 
-                    // Any other dynamic indexing: array[i].
-                    _ => {
-                        context.span_lint(
-                            SECURITY_INDEXING_USAGE,
-                            expression.span,
-                            |diagnostic: &mut Diag<'_, ()>| {
-                                diagnostic.primary_message(
-                                    "Usage of indexing operation detected.",
-                                );
-                            },
-                        );
-                    },
-                }
-            },
-
-            _ => {},
+                // Any other dynamic indexing: array[i].
+                _ => {
+                    context.span_lint(
+                        SECURITY_INDEXING_USAGE,
+                        expression.span,
+                        |diagnostic: &mut Diag<'_, ()>| {
+                            diagnostic.primary_message(
+                                "Usage of indexing operation detected.",
+                            );
+                        },
+                    );
+                },
+            }
         }
     }
 
@@ -97,20 +93,18 @@ impl<'tcx> LateLintPass<'tcx> for SecurityIndexingUsage {
         if let ItemKind::Impl(implementation) = &item.kind
             && let Some(trait_ref) = implementation.of_trait
             && let Some(def_id) = trait_ref.trait_ref.path.res.opt_def_id()
+            && (context.tcx.lang_items().index_trait() == Some(def_id)
+                || context.tcx.lang_items().index_mut_trait() == Some(def_id))
         {
-            if context.tcx.lang_items().index_trait() == Some(def_id)
-                || context.tcx.lang_items().index_mut_trait() == Some(def_id)
-            {
-                context.span_lint(
-                    SECURITY_INDEXING_USAGE,
-                    item.span,
-                    |diagnostic: &mut Diag<'_, ()>| {
-                        diagnostic.primary_message(
-                            "Implementation of Index/IndexMut trait detected.",
-                        );
-                    },
-                );
-            }
+            context.span_lint(
+                SECURITY_INDEXING_USAGE,
+                item.span,
+                |diagnostic: &mut Diag<'_, ()>| {
+                    diagnostic.primary_message(
+                        "Implementation of Index/IndexMut trait detected.",
+                    );
+                },
+            );
         }
     }
 }
